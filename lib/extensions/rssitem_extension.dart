@@ -4,9 +4,14 @@ import 'package:webfeed/webfeed.dart';
 extension RssItemUtil on RssItem {
   /// Convert to [News].
   News get toNews => News(
-        title: title!,
+        title: title ?? dc?.title ?? '',
         link: link!,
         pubDate: pubDate!,
-        source: source!.value!,
+        source: source?.value ??
+            dc?.source ??
+            dc?.publisher ??
+            author ??
+            dc?.creator ??
+            '',
       );
 }

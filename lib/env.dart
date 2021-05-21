@@ -13,25 +13,27 @@ class Env {
 
   /// Setup .env file.
   static Future<void> init() async {
-    final RetryClient client = RetryClient(http.Client());
-
     _env = json.decode(await rootBundle.loadString(
       kReleaseMode ? '.env' : '.env_dev',
     )) as Map<String, dynamic>;
 
-    try {
-      final String body =
-          await client.read(Uri.parse(_env['locationApi']! as String));
-      final String location = jsonDecode(body)['country'] as String;
+    if (_env['localNews']!.toString().contains('{location}')) {
+      final RetryClient client = RetryClient(http.Client());
 
-      _env['localNews'] = _env['localNews']?.replaceFirst(
-        '{location}',
-        location,
-      );
-    } catch (e) {
-      logger('Env', 'Failed to get country. $e', StackTrace.current);
-    } finally {
-      client.close();
+      try {
+        final String body =
+            await client.read(Uri.parse(_env['locationApi']! as String));
+        final String location = jsonDecode(body)['country'] as String;
+
+        _env['localNews'] = _env['localNews']?.replaceFirst(
+          '{location}',
+          location,
+        );
+      } catch (e) {
+        logger('Env', 'Failed to get country. $e', StackTrace.current);
+      } finally {
+        client.close();
+      }
     }
   }
 
